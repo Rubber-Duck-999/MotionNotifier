@@ -52,7 +52,7 @@ target_link_libraries(${PROJECT_NAME}
                        opencv_aruco 
                        opencv_bgsegm 
                        opencv_bioinspired 
-                       opencv_ccalib 
+                       opencv_ccalib
                        opencv_dnn_objdetect 
                        opencv_dnn_superres
                        opencv_dpm 

@@ -1,0 +1,12 @@
+[2020-03-30 21:20:17.328921][info]:  Success in channel
+[2020-03-30 21:20:17.332235][info]:  Starting camera
+[2020-03-30 21:20:20.626258][info]:  Program has been running for 3.28471 seconds
+[2020-03-30 21:20:20.626751][warning]:  Motion detected, publishing topic 1566
+[2020-03-30 21:20:24.550739][info]:  Program has been running for 3.90423 seconds
+[2020-03-30 21:20:24.551176][warning]:  Motion detected, publishing topic 1538
+[2020-03-30 21:20:26.802526][info]:  Program has been running for 2.23261 seconds
+[2020-03-30 21:20:26.803083][warning]:  Motion detected, publishing topic 1624.5
+[2020-03-30 21:20:30.148550][info]:  Program has been running for 3.32295 seconds
+[2020-03-30 21:20:30.148914][warning]:  Motion detected, publishing topic 2115
+[2020-03-30 21:20:34.451557][info]:  Program has been running for 4.28396 seconds
+[2020-03-30 21:20:34.452003][warning]:  Motion detected, publishing topic 1770.5

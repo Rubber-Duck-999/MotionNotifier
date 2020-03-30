@@ -23,53 +23,40 @@ join(InIter begin, InIter end, std::string delim)
 int main(int argc, const char* argv[])
 {
     init_log();
-    BOOST_LOG_TRIVIAL(trace) << "this is a trace message";
-    BOOST_LOG_TRIVIAL(debug) << "this is a debug message";
-    BOOST_LOG_TRIVIAL(info) << "this is a info message";
-    BOOST_LOG_TRIVIAL(warning) << "this is a warning message";
-    BOOST_LOG_TRIVIAL(error) << "this is an error message";
-    BOOST_LOG_TRIVIAL(fatal) << "this is a fatal error message";
-
-    const std::string routing_key = "motion.response";
-    const std::string msg = "Motion Detected on CM";
+    BOOST_LOG_TRIVIAL(trace) << "Beginning Camera Monitor Initialisation";
 
     auto evbase = event_base_new();
     LibEventHandlerMyError handler(evbase);
-    AMQP::TcpConnection connection(&handler,
-            AMQP::Address("localhost", 5672,
-                          AMQP::Login("guest", "guest"), "/"));
+    AMQP::Address addr = AMQP::Address("localhost", kPort, 
+        AMQP::Login(kUsername, kPassword), "/");
+    AMQP::TcpConnection connection(&handler, addr);
 
     AMQP::TcpChannel channel(&connection);
 
-    channel.onError([&evbase](const char* message)
+    channel.onError([&evbase](const char* msg)
         {
-            std::cout << "Channel error: " << message << std::endl;
+            BOOST_LOG_TRIVIAL(error) << "Channel error: " << msg;
             event_base_loopbreak(evbase);
-        });
+    });
 
-    unsigned int microseconds = 2000;
+    
 
-    usleep(microseconds);
+    usleep(kMicroseconds);
 
-    channel.declareExchange("topics", AMQP::topic, true)
-        .onError([&](const char* msg)
+    channel.declareExchange("topics", AMQP::topic, true).onError([&](const char* msg) 
+    {
+        BOOST_LOG_TRIVIAL(error) << "Error on exchange declaration: " << msg;
+    }).onSuccess 
+    (
+        [&]()
         {
-            std::cout << "ERROR: " << msg << std::endl;
-        })
-        .onSuccess
-        (
-            [&]()
-            {
-                channel.publish("topics", kFailureComponent, msg);
-                std::cout << "Sent " << std::endl;
-                channel.publish("topics", kMotionResponse, msg);
-                channel.publish("topics", kFailureCamera, msg);
-                usleep(microseconds);
-                event_base_loopbreak(evbase);
-            }
-        );
+            BOOST_LOG_TRIVIAL(info) << "Success in channel";
+            usleep(kMicroseconds);
+            event_base_loopbreak(evbase);
+        }
+    );
     event_base_dispatch(evbase);
     event_base_free(evbase);
-    run();
+    run(channel);
     return 0;
 }
