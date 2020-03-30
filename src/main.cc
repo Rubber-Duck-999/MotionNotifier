@@ -9,6 +9,7 @@
 #include <iostream>
 #include "logging.h"
 #include <unistd.h>
+#include "object.h"
 
 template<class InIter> inline std::string
 join(InIter begin, InIter end, std::string delim)
@@ -64,10 +65,11 @@ int main(int argc, const char* argv[])
                 channel.publish("topics", kMotionResponse, msg);
                 channel.publish("topics", kFailureCamera, msg);
                 usleep(microseconds);
-                //event_base_loopbreak(evbase);
+                event_base_loopbreak(evbase);
             }
         );
     event_base_dispatch(evbase);
     event_base_free(evbase);
+    run();
     return 0;
 }
