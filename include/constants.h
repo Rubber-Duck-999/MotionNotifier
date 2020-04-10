@@ -29,9 +29,9 @@ static std::string getDateTime()
 
     std::stringstream date;
     date<< ltm->tm_mday
-         << "/"
+         << ":"
          << 1 + ltm->tm_mon
-         << "/"
+         << ":"
          << 1900 + ltm->tm_year
          << " "
          << 1 + ltm->tm_hour
@@ -77,7 +77,7 @@ const std::string kPassword = "password";
 
 
 /* Camera */
-const int kMinContours = 1500;
+const int kMinContours =3000;
 const int kCameraPin = 0;
 const unsigned int kMicroseconds = 2000;
 

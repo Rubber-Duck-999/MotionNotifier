@@ -8,49 +8,62 @@ vector<Vec4i> hierarchy;
 
 std::string captureMotion(int seconds, AMQP::TcpChannel& channel)
 {
-    static int current = 1;
-    BOOST_LOG_TRIVIAL(info) << "Program has been running for " << seconds << " seconds";
-    BOOST_LOG_TRIVIAL(warning) << "Motion detected, publishing topic ";
+    static int current = 0;
+    BOOST_LOG_TRIVIAL(trace) << "Program has been running for " << seconds << " seconds";
+    BOOST_LOG_TRIVIAL(warning) << "Motion detected, making message for Motion.Response ";
     std::string filename = getDateTime() + "_" + std::to_string(current) + ".jpg";
     nlohmann::json tempJson;
     tempJson["file"] = filename;
     tempJson["time"] = getTime();
     current++;
-    BOOST_LOG_TRIVIAL(debug) << "File to be saved : " << filename;
+    BOOST_LOG_TRIVIAL(debug) << "File to be saved: " << filename;
     switch(seconds)
     {
-        case 2:
-        {
-            tempJson["severity"] = kMotionLow;
-            std::string temp = tempJson.dump();
-            channel.publish("topics", kMotionResponse, temp);
-            return filename;
-        }
         case 3:
         {
-            tempJson["severity"] = kMotionMed;
-            std::string temp = tempJson.dump();
-            channel.publish("topics", kMotionResponse, temp);
+            if(tempJson != NULL)
+            {
+                tempJson["severity"] = kMotionMed;
+                std::string temp = tempJson.dump();
+                channel.publish("topics", kMotionResponse, temp);
+            }
+            else
+            {
+                BOOST_LOG_TRIVIAL(error) << "Failure on json type";
+            }
             return filename;
         }
         case 4:
         {
-            tempJson["severity"] = kMotionMedHigh;
-            std::string temp = tempJson.dump();
-            channel.publish("topics", kMotionResponse, temp);
+            if(tempJson != NULL)
+            {
+                tempJson["severity"] = kMotionMedHigh;
+                std::string temp = tempJson.dump();
+                channel.publish("topics", kMotionResponse, temp);
+            }
+            else
+            {
+                BOOST_LOG_TRIVIAL(error) << "Failure on json type";
+            }
             return filename;
         }
         case 5:
         {
-            tempJson["severity"] = kMotionHigh;
-            std::string temp = tempJson.dump();
-            channel.publish("topics", kMotionResponse, temp);
-            BOOST_LOG_TRIVIAL(error) << "Really high motion detected = 6";
+            if(tempJson != NULL)
+            {
+                tempJson["severity"] = kMotionHigh;
+                std::string temp = tempJson.dump();
+                //channel.publish("topics", kMotionResponse, temp);
+            }
+            else
+            {
+                BOOST_LOG_TRIVIAL(error) << "Failure on json type";
+            }
             return filename;
         }
         default:
         {
-            BOOST_LOG_TRIVIAL(error) << "Error on motion";
+            BOOST_LOG_TRIVIAL(debug) << "Motion longer than 5 seconds";
             return filename;
         }
     }
@@ -75,6 +88,7 @@ void run(AMQP::TcpChannel& channel)
     Mat frame, fgMask;
     auto start_time = std::chrono::system_clock::now();
     auto current_time = std::chrono::system_clock::now();
+    static int startCount = 0;
     while (true) 
     {
         capture >> frame;
@@ -108,34 +122,30 @@ void run(AMQP::TcpChannel& channel)
             BOOST_LOG_TRIVIAL(trace) << "Next found at " << std::ctime(&current);
             //
             BOOST_LOG_TRIVIAL(trace) << "Difference in time: " << seconds.count() << std::endl;
-            if(seconds.count() >= 2)
+            if(seconds.count() >= 3 && startCount >= 2)
             {
+                int temp = seconds.count();
                 std::string filename = captureMotion(seconds.count(), _channel);
+                BOOST_LOG_TRIVIAL(trace) << "File " << filename;
                 ofstream fileStream;
-                fileStream.open(filename);
-                if (fileStream.fail()) 
+                try 
                 {
-                    try 
-                    {
-                    BOOST_LOG_TRIVIAL(debug) << "File is not there, create";
+                    BOOST_LOG_TRIVIAL(debug) << "File is not there, creating: " + filename;
                     imwrite(filename, frame);
-                    }
-                    catch(Exception& e)
-                    {
-                        const char* err_msg = e.what();
-                        BOOST_LOG_TRIVIAL(error) << "Exception caught: " << err_msg;
-                    }
-                }    
-                else
+                }
+                catch(runtime_error& e)
                 {
-                    BOOST_LOG_TRIVIAL(debug) << "Somehow the file exists, re-trying";
-                }       
+                    const char* err_msg = e.what();
+                    BOOST_LOG_TRIVIAL(error) << "Exception caught: " << err_msg;
+                }     
                 approxPolyDP( contours[i], contours_poly[i], 3, true );
                 boundRect[i] = boundingRect( contours_poly[i] );
                 Scalar color = Scalar( rng.uniform(0, 256), rng.uniform(0,256), rng.uniform(0,256) );
                 rectangle( frame, boundRect[i].tl(), boundRect[i].br(), color, 2 );
                 start_time = std::chrono::system_clock::now();
+                BOOST_LOG_TRIVIAL(trace) << "Restarting clock";
             }
         }
+        startCount++;
     }
 }
