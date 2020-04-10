@@ -34,7 +34,7 @@ static void init_log()
     // Only output message with trace or higher severity in Release
 #ifndef _DEBUG
     boost::log::core::get()->set_filter(
-        boost::log::trivial::severity >= boost::log::trivial::info
+        boost::log::trivial::severity >= boost::log::trivial::debug
     );
 #endif
 

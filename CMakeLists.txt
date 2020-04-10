@@ -9,6 +9,8 @@ set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.61.0 REQUIRED COMPONENTS log)
 find_package(Threads)
 
+#find_package(nlohmann_json 3.2.0 REQUIRED)
+
 # Folder where the Coverage module is
 #set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
 
@@ -20,6 +22,8 @@ set (INCL_DIR include)
 
 # Compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3 -Wall")
+
+
 
 include_directories(${Boost_INCLUDE_DIRS} 
                     /usr/local/include
