@@ -23,9 +23,21 @@ std::string captureMotion(int seconds, AMQP::TcpChannel& channel)
         {
             if(tempJson != NULL)
             {
-                tempJson["severity"] = kMotionMed;
-                std::string temp = tempJson.dump();
-                channel.publish("topics", kMotionResponse, temp);
+                try
+                {
+                    tempJson["severity"] = kMotionMed;
+                    std::string temp = tempJson.dump();
+                    channel.publish("topics", kMotionResponse, temp);
+                }
+                catch (nlohmann::json::type_error& e)
+                {
+                    BOOST_LOG_TRIVIAL(error) << "Exception: " << e.what();
+                }
+                catch (...)
+                {
+                    BOOST_LOG_TRIVIAL(error) << "Exception";
+                }
+
             }
             else
             {
@@ -37,9 +49,20 @@ std::string captureMotion(int seconds, AMQP::TcpChannel& channel)
         {
             if(tempJson != NULL)
             {
-                tempJson["severity"] = kMotionMedHigh;
-                std::string temp = tempJson.dump();
-                channel.publish("topics", kMotionResponse, temp);
+                try
+                {
+                    tempJson["severity"] = kMotionMedHigh;
+                    std::string temp = tempJson.dump();
+                    channel.publish("topics", kMotionResponse, temp);
+                }
+                catch (nlohmann::json::type_error& e)
+                {
+                    BOOST_LOG_TRIVIAL(error) << "Exception: " << e.what();
+                }
+                catch (...)
+                {
+                    BOOST_LOG_TRIVIAL(error) << "Exception";
+                }
             }
             else
             {
@@ -51,9 +74,20 @@ std::string captureMotion(int seconds, AMQP::TcpChannel& channel)
         {
             if(tempJson != NULL)
             {
-                tempJson["severity"] = kMotionHigh;
-                std::string temp = tempJson.dump();
-                //channel.publish("topics", kMotionResponse, temp);
+                try
+                {
+                    tempJson["severity"] = kMotionHigh;
+                    std::string temp = tempJson.dump();
+                    channel.publish("topics", kMotionResponse, temp);
+                }
+                catch (nlohmann::json::type_error& e)
+                {
+                    BOOST_LOG_TRIVIAL(error) << "Exception: " << e.what();
+                }
+                catch (...)
+                {
+                    BOOST_LOG_TRIVIAL(error) << "Exception";
+                }
             }
             else
             {

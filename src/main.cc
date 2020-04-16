@@ -11,16 +11,6 @@
 #include <unistd.h>
 #include "object.h"
 
-/*
-template<class InIter> inline std::string
-join(InIter begin, InIter end, std::string delim)
-{
-    std::stringstream ss;
-    std::copy(begin, end,
-            std::ostream_iterator<const char*>(ss, delim.c_str()));
-    return ss.str();
-}*/
-
 int main(int argc, const char* argv[])
 {
     init_log();
