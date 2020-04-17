@@ -59,11 +59,9 @@ static std::string getTime()
 }
 
 /* Motion message json */
-const int kMotionHigh = 4;
-const int kMotionMedHigh = 3; 
-const int kMotionMed = 2; 
-const int kMotionLow = 1; 
-const int kMotionNone = 0; 
+const int kMotionHigh = 5;
+const int kMotionMed = 4; 
+const int kMotionLow = 3; 
 
 /* Failure message json */
 const nlohmann::json kFailurePinUnavailable = {{"time", getTime()},

@@ -33,7 +33,6 @@ include_directories(${Boost_INCLUDE_DIRS}
 link_directories(${Boost_LIBRARY_DIRS})
 # Important: Include all source files on this list
 set (SOURCE
-    ${SRC_DIR}/object.cc
     ${SRC_DIR}/main.cc
 )
 
