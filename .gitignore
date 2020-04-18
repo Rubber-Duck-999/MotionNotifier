@@ -39,3 +39,4 @@ object
 *.settings/Debug/
 /build/
 /AMQP-CPP/
+conf.json
