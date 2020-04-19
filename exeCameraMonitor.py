@@ -36,6 +36,7 @@ channel.exchange_declare(exchange='topics', exchange_type='topic', durable=True)
 motion_response   = 'Motion.Response'
 failure_camera    = 'Failure.Camera'
 failure_component = 'Failure.Component'
+ping = 'ping'
 result = channel.queue_declare(queue='', exclusive=False, durable=True)
 queue_name = result.method.queue
 
@@ -126,7 +127,7 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
 					x = { 
 						"file": image,
 						"time": today.strftime("%d:%m:%Y %H:%M:%S"),
-						"severity": 5
+						"severity": 4
 					}
 					motion = json.dumps(x)
 					channel.basic_publish(exchange='topics', routing_key=motion_response, body=motion)
@@ -152,3 +153,7 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
 
 	# clear the stream in preparation for the next frame
 	rawCapture.truncate(0)
+
+	if datetime.now().second == 0:
+		x = 'N/A'
+		channel.basic_publish(exchange='topics', routing_key=ping, body=x)
