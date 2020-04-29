@@ -1,6 +1,6 @@
 # HouseGuard-CameraMonitor
 
-HouseGuard-CameraMonitor is a c++ component that monitors a camera feed for whether a person has affected the background of the room
+HouseGuard-CameraMonitor is a python component that monitors a camera feed for whether a person has affected the background of the room
 
 ## Installation
 

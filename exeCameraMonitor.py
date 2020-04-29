@@ -54,6 +54,7 @@ avg = None
 lastUploaded = datetime.now()
 motionCounter = 0
 
+
 # capture frames from the camera
 for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 	# grab the raw NumPy array representing the image and initialize
@@ -131,6 +132,7 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
 					}
 					motion = json.dumps(x)
 					channel.basic_publish(exchange='topics', routing_key=motion_response, body=motion)
+					time.sleep(3)
 
 				# update the last uploaded timestamp and reset the motion
 				# counter
@@ -140,16 +142,6 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
 	# otherwise, the room is not occupied
 	else:
 		motionCounter = 0
-
-	# check to see if the frames should be displayed to screen
-	if conf["show_video"]:
-		# display the security feed
-		cv2.imshow("Security Feed", frame)
-		key = cv2.waitKey(1) & 0xFF
-
-		# if the `q` key is pressed, break from the lop
-		if key == ord("q"):
-			break
 
 	# clear the stream in preparation for the next frame
 	rawCapture.truncate(0)
