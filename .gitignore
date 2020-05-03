@@ -40,3 +40,4 @@ object
 /build/
 /AMQP-CPP/
 conf.json
+cameramonitor.log
