@@ -9,10 +9,7 @@ They can be used on linux only
 Please install opencv and rabbitmq first
 
 ```bash
-mkdir build && cd build
-cmake ..
-make
-./exeCameraMonitor
+python3 exeCameraMonitor.py -c conf.json
 ```
 
 
