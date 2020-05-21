@@ -130,13 +130,6 @@ def motion():
 			cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 			text = "Occupied"
 
-		# draw the text and timestamp on the frame
-		ts = timestamp.strftime("%A %d %B %Y %I:%M:%S%p")
-		cv2.putText(frame, "Room Status: {}".format(text), (10, 20),
-			cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-		cv2.putText(frame, ts, (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX,
-			0.35, (0, 0, 255), 1)
-
 		# check to see if the room is occupied
 		if text == "Occupied":
 			# check to see if enough time has passed between uploads
@@ -150,12 +143,13 @@ def motion():
 					# check to see if we should take pictures
 					image = None
 					logging.warning("Motion detected")
+					today = datetime.now()
 					if conf["use_images"]:
 						image = today.strftime("%d:%m:%Y %H:%M:%S") + ".jpg"
 						logging.warning("Creating file: " + image)
 						cv2.imwrite(image, frame)
+					logging.warning("Image created")
 					# Publish to Rabbitmq
-					today = datetime.now()
 					x = { 
 						"file": image,
 						"time": today.strftime("%d:%m:%Y %H:%M:%S"),
