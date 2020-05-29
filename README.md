@@ -1,10 +1,12 @@
 # HouseGuard-CameraMonitor
 
+[![codebeat badge](https://codebeat.co/badges/94f2d058-b578-400b-90f6-790b96d0749c)](https://codebeat.co/projects/github-com-rubber-duck-999-houseguard-cameramonitor-master)
+
 HouseGuard-CameraMonitor is a python component that monitors a camera feed for whether a person has affected the background of the room
 
 ## Installation
 
-They can be used on linux only
+This can be used on linux only
 
 Please install opencv and rabbitmq first
 
