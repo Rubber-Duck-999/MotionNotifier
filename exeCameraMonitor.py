@@ -145,19 +145,19 @@ def motion():
 					logging.warning("Motion detected")
 					today = datetime.now()
 					if conf["use_images"]:
-						image = today.strftime("%d:%m:%Y %H:%M:%S") + ".jpg"
+						image = today.strftime("%d:%m:%Y-%H:%M:%S") + ".jpg"
 						logging.warning("Creating file: " + image)
 						cv2.imwrite(image, frame)
 					logging.warning("Image created")
 					# Publish to Rabbitmq
 					x = { 
 						"file": image,
-						"time": today.strftime("%d:%m:%Y %H:%M:%S"),
+						"time": today.strftime("%d:%m:%Y-%H:%M:%S"),
 						"severity": 4
 					}
 					motion = json.dumps(x)
 					channel.basic_publish(exchange='topics', routing_key=motion_response, body=motion)
-					time.sleep(3)
+					time.sleep(10)
 
 					# update the last uploaded timestamp and reset the motion
 					# counter
