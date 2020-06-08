@@ -157,7 +157,7 @@ def motion():
 					}
 					motion = json.dumps(x)
 					channel.basic_publish(exchange='topics', routing_key=motion_response, body=motion)
-					time.sleep(10)
+					time.sleep(120)
 
 					# update the last uploaded timestamp and reset the motion
 					# counter
