@@ -7,10 +7,10 @@ git pull
 if [ -f exeCameraMonitor.py ];
 then
     echo "CM File found"
-    if [ -f $HOME/Documents/Temp/exeCameraMonitor.py ];
+    if [ -f $HOME/Documents/Deploy/exeCameraMonitor.py ];
     then
         echo "CM old removed"
-        rm -f $HOME/Documents/Temp/exeCameraMonitor.py
+        rm -f $HOME/Documents/Deploy/exeCameraMonitor.py
     fi
-    cp exeCameraMonitor.py $HOME/Documents/Temp/exeCameraMonitor.py
+    cp exeCameraMonitor.py $HOME/Documents/Deploy/exeCameraMonitor.py
 fi
