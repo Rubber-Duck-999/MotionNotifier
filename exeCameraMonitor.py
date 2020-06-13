@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # USAGE
-# python cameramonitor.py -c conf.json
+# python exeCameraMonitor.py -c conf.json
 
 # import the necessary packages
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 import argparse, warnings
+from PIL import Image
 from datetime import datetime
 import imutils, json, time, cv2, logging
 import pika, sys, os
@@ -148,9 +149,10 @@ def motion():
 						image = today.strftime("%d:%m:%Y-%H:%M:%S") + ".jpg"
 						logging.warning("Creating file: " + image)
 						cv2.imwrite(image, frame)
+						transposed  = colorImage.transpose(Image.ROTATE_180)
 					logging.warning("Image created")
 					# Publish to Rabbitmq
-					x = { 
+					x = {
 						"file": image,
 						"time": today.strftime("%d:%m:%Y-%H:%M:%S"),
 						"severity": 4
