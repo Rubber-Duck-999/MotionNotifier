@@ -149,7 +149,9 @@ def motion():
 						image = today.strftime("%d:%m:%Y-%H:%M:%S") + ".jpg"
 						logging.warning("Creating file: " + image)
 						cv2.imwrite(image, frame)
-						transposed  = image.transpose(Image.ROTATE_180)
+						colorImage  = Image.open(image)
+						transposed  = colorImage.rotate(180)
+						transposed.save(image)
 					logging.warning("Image created")
 					# Publish to Rabbitmq
 					x = {
