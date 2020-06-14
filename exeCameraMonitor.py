@@ -18,11 +18,11 @@ ap.add_argument("-c", "--conf", required=True,
 args = vars(ap.parse_args())
 
 try:
-	os.remove('cameramonitor.log')
+	os.remove('logs/cameramonitor.log')
 except:
 	print("The log did not exist")
 
-logging.basicConfig(filename='cameramonitor.log',filemode='w', format='%(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(filename='logs/cameramonitor.log',filemode='w', format='%(levelname)s - %(message)s', level=logging.INFO)
 # filter warnings, load the configuration
 warnings.filterwarnings("ignore")
 try:
@@ -161,7 +161,7 @@ def motion():
 					}
 					motion = json.dumps(x)
 					channel.basic_publish(exchange='topics', routing_key=motion_response, body=motion)
-					time.sleep(120)
+					time.sleep(20)
 
 					# update the last uploaded timestamp and reset the motion
 					# counter
