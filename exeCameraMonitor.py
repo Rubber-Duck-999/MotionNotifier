@@ -9,7 +9,9 @@ import argparse, warnings
 from PIL import Image
 from datetime import datetime
 import imutils, json, time, cv2, logging
-import pika, sys, os
+import pika, sys, os, queue, threading
+
+# initialize the camera and grab a reference to the raw camera capture
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -56,13 +58,14 @@ ping = 'Camera.Ping'
 result = channel.queue_declare(queue='', exclusive=False, durable=True)
 queue_name = result.method.queue
 
-# initialize the camera and grab a reference to the raw camera capture
 try:
 	logging.info("Starting up camera")
 	camera = PiCamera()
 	camera.resolution = tuple(conf["resolution"])
 	camera.framerate = conf["fps"]
 	rawCapture = PiRGBArray(camera, size=tuple(conf["resolution"]))
+	# allow the camera to warmup, then initialize the average frame, last
+	# uploaded timestamp, and frame motion counter
 except:
 	logging.error("Camera failure - publish topic")
 	today = datetime.now()
@@ -76,107 +79,171 @@ except:
 	except:
 		logging.error("Failed to publish")
 
-# allow the camera to warmup, then initialize the average frame, last
-# uploaded timestamp, and frame motion counter
 time.sleep(conf["camera_warmup_time"])
-
 # capture frames from the camera
-def motion():
+def motion(num, q):
 	avg = None
 	lastUploaded = datetime.now()
 	motionCounter = 0
-	for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-		# grab the raw NumPy array representing the image and initialize
-		# the timestamp and occupied/unoccupied text
-		frame = f.array
-		timestamp = datetime.now()
-		text = "Unoccupied"
+	run = True
+	while run == True:
+		for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 
-		# resize the frame, convert it to grayscale, and blur it
-		frame = imutils.resize(frame, width=500)
-		gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-		gray = cv2.GaussianBlur(gray, (21, 21), 0)
+			# grab the raw NumPy array representing the image and initialize
+			# the timestamp and occupied/unoccupied text
+			frame = f.array
+			timestamp = datetime.now()
+			text = "Unoccupied"
 
-		# if the average frame is None, initialize it
-		if avg is None:
-			logging.info("Starting background model...")
-			avg = gray.copy().astype("float")
-			rawCapture.truncate(0)
-			continue
+			# resize the frame, convert it to grayscale, and blur it
+			frame = imutils.resize(frame, width=500)
+			gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+			gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
-		# accumulate the weighted average between the current frame and
-		# previous frames, then compute the difference between the current
-		# frame and running average
-		cv2.accumulateWeighted(gray, avg, 0.5)
-		frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(avg))
-
-		# threshold the delta image, dilate the thresholded image to fill
-		# in holes, then find contours on thresholded image
-		thresh = cv2.threshold(frameDelta, conf["delta_thresh"], 255,
-			cv2.THRESH_BINARY)[1]
-		thresh = cv2.dilate(thresh, None, iterations=2)
-		cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
-			cv2.CHAIN_APPROX_SIMPLE)
-		cnts = imutils.grab_contours(cnts)
-
-		# loop over the contours
-		for c in cnts:
-			# if the contour is too small, ignore it
-			if cv2.contourArea(c) < conf["min_area"]:
+			# if the average frame is None, initialize it
+			if avg is None:
+				logging.info("Starting background model...")
+				avg = gray.copy().astype("float")
+				rawCapture.truncate(0)
 				continue
 
-			# compute the bounding box for the contour, draw it on the frame,
-			# and update the text
-			(x, y, w, h) = cv2.boundingRect(c)
-			cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-			text = "Occupied"
+			# accumulate the weighted average between the current frame and
+			# previous frames, then compute the difference between the current
+			# frame and running average
+			cv2.accumulateWeighted(gray, avg, 0.5)
+			frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(avg))
 
-		# check to see if the room is occupied
-		if text == "Occupied":
-			# check to see if enough time has passed between uploads
-			if (timestamp - lastUploaded).seconds >= conf["min_image_seconds"]:
-				# increment the motion counter
-				motionCounter += 1
+			# threshold the delta image, dilate the thresholded image to fill
+			# in holes, then find contours on thresholded image
+			thresh = cv2.threshold(frameDelta, conf["delta_thresh"], 255,
+				cv2.THRESH_BINARY)[1]
+			thresh = cv2.dilate(thresh, None, iterations=2)
+			cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
+				cv2.CHAIN_APPROX_SIMPLE)
+			cnts = imutils.grab_contours(cnts)
 
-				# check to see if the number of frames with consistent motion is
-				# high enough
-				if motionCounter >= conf["min_motion_frames"]:
-					# check to see if we should take pictures
-					image = None
-					logging.warning("Motion detected")
-					today = datetime.now()
-					if conf["use_images"]:
-						image = today.strftime("%d:%m:%Y-%H:%M:%S") + ".jpg"
-						logging.warning("Creating file: " + image)
-						cv2.imwrite(image, frame)
-						colorImage  = Image.open(image)
-						transposed  = colorImage.rotate(180)
-						transposed.save(image)
-					logging.warning("Image created")
-					# Publish to Rabbitmq
-					x = {
-						"file": image,
-						"time": today.strftime("%d:%m:%Y-%H:%M:%S"),
-						"severity": 4
-					}
-					motion = json.dumps(x)
-					channel.basic_publish(exchange='topics', routing_key=motion_response, body=motion)
-					time.sleep(20)
+			# loop over the contours
+			for c in cnts:
+				# if the contour is too small, ignore it
+				if cv2.contourArea(c) < conf["min_area"]:
+					continue
 
-					# update the last uploaded timestamp and reset the motion
-					# counter
-					lastUploaded = timestamp
-					motionCounter = 0
+				# compute the bounding box for the contour, draw it on the frame,
+				# and update the text
+				(x, y, w, h) = cv2.boundingRect(c)
+				cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+				text = "Occupied"
 
-		# otherwise, the room is not occupied
+			# check to see if the room is occupied
+			if text == "Occupied":
+				# check to see if enough time has passed between uploads
+				if (timestamp - lastUploaded).seconds >= conf["min_image_seconds"]:
+					# increment the motion counter
+					motionCounter += 1
+
+					# check to see if the number of frames with consistent motion is
+					# high enough
+					if motionCounter >= conf["min_motion_frames"]:
+						# check to see if we should take pictures
+						image = None
+						logging.warning("Motion detected")
+						today = datetime.now()
+						if conf["use_images"]:
+							image = today.strftime("%d:%m:%Y-%H:%M:%S") + ".jpg"
+							logging.warning("Creating file: " + image)
+							cv2.imwrite(image, frame)
+							colorImage  = Image.open(image)
+							transposed  = colorImage.rotate(180)
+							transposed.save(image)
+						logging.warning("Image created")
+						# Publish to Rabbitmq
+						x = {
+							"file": image,
+							"time": today.strftime("%d:%m:%Y-%H:%M:%S"),
+							"severity": 4
+						}
+						motion = json.dumps(x)
+						channel.basic_publish(exchange='topics', routing_key=motion_response, body=motion)
+						time.sleep(20)
+
+						# update the last uploaded timestamp and reset the motion
+						# counter
+						lastUploaded = timestamp
+						motionCounter = 0
+
+			# otherwise, the room is not occupied
+			else:
+				motionCounter = 0
+
+			# clear the stream in preparation for the next frame
+			rawCapture.truncate(0)
+
+			if not q.empty():
+				if q.get() == "Stop":
+					logging.info("Received stop")
+					run = False
+				else:
+					run = True
+
+	while run == False:
+		if q.empty():
+			logging.info("No messages on stop run")
+			time.sleep(5)
 		else:
-			motionCounter = 0
+			if q.get() == "Start":
+				run = True
+	motion()
 
-		# clear the stream in preparation for the next frame
-		rawCapture.truncate(0)
+class PikaMassenger():
 
-		if datetime.now().second == 0:
-			x = 'Alive'
-			channel.basic_publish(exchange='topics', routing_key=ping, body=x)
+    exchange_name = 'topics'
 
-motion()
+    def __init__(self, *args, **kwargs):
+        try:
+            credentials = pika.PlainCredentials('guest', "password")
+            self.conn = pika.BlockingConnection(pika.ConnectionParameters('localhost', 5672, '/', credentials))
+        except pika.exceptions.ProbableAuthenticationError:
+            exit(1)
+        self.channel = self.conn.channel()
+        self.channel.exchange_declare(
+            exchange=self.exchange_name, 
+            exchange_type='topic',
+             durable=True)
+
+    def consume(self, keys, callback):
+        result = self.channel.queue_declare('', exclusive=False, durable=True)
+        queue_name = result.method.queue
+        for key in keys:
+            self.channel.queue_bind(
+                exchange=self.exchange_name, 
+                queue=queue_name, 
+                routing_key=key)
+            self.channel.queue_bind(exchange='topics', queue=queue_name, routing_key='camera.stop')
+
+        self.channel.basic_consume(
+            queue=queue_name, 
+            on_message_callback=callback, 
+            auto_ack=True)
+
+        self.channel.start_consuming()
+
+
+    def __enter__(self):
+        return self
+
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.conn.close()
+
+def start_consumer(num, q):
+
+    def callback(ch, method, properties, body):
+        print(" [x] %r:%r consumed" % (method.routing_key, body))
+        q.put("Stop")
+
+q = queue.Queue()
+consumer_thread = threading.Thread(target=start_consumer, args=(0, q))
+consumer_thread.start()
+
+thread = threading.Thread(target=motion, args=(0, q))
+thread.start()
