@@ -31,7 +31,7 @@ try:
 	conf = json.load(open(args["conf"]))
 except IOError:
 	logging.error("File was not able to be loaded")
-	exit(1)
+	sys.exit(1)
 
 # Setup rabbitmq connection
 logging.info("[INFO] Initialise pika connection")
@@ -40,7 +40,7 @@ try:
 	connection = pika.BlockingConnection(pika.ConnectionParameters('localhost', 5672, '/', credentials))
 except pika.exceptions.ProbableAuthenticationError:
 	logging.error("The rabbitmq credentials are incorrect")
-	exit(1)
+	sys.exit(1)
 
 try:
 	logging.info("Starting up channel")
@@ -48,7 +48,7 @@ try:
 	channel.exchange_declare(exchange='topics', exchange_type='topic', durable=True)
 except pika.exceptions.ChannelError:
 	logging.error("Channel failed to connect, exiting")
-	exit(1)
+	sys.exit(1)
 
 ## Topics
 motion_response   = 'Motion.Response'
