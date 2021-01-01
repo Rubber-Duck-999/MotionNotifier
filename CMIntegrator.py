@@ -31,6 +31,7 @@ print("Beginning Subscribe")
 print("Waiting for notifications")
 failure = '{ "time":"14:56:00", "type_of_failure": "Camera" }'
 channel.basic_publish(exchange='topics', routing_key='camera.start', body=failure)
+time.sleep(10)
 channel.basic_publish(exchange='topics', routing_key='camera.stop', body=failure)
 
 def callback(ch, method, properties, body):

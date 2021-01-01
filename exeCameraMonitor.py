@@ -184,14 +184,16 @@ def motion(num, q):
 					logging.info("Received stop")
 					run = False
 				else:
+					logging.info("Received start when already on start")
 					run = True
 
 	while run == False:
 		if q.empty():
 			logging.info("No messages on stop run")
-			time.sleep(5)
+			time.sleep(30)
 		else:
 			if q.get() == "Start":
+				logging.info("Start received - run")
 				run = True
 	motion()
 

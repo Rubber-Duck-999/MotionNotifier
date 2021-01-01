@@ -42,7 +42,6 @@ class PikaMassenger():
 def start_consumer(num, q):
 
     def callback(ch, method, properties, body):
-        print(" [x] %r:%r consumed" % (method.routing_key, body))
         if method.routing_key == "camera.start":
             q.put("Stop")
         elif method.routing_key == "camera.stop":
