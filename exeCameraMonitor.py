@@ -180,6 +180,7 @@ def motion(num, q):
 			rawCapture.truncate(0)
 
 			if not q.empty():
+				logging.info("Queue isn't empty")
 				if q.get() == "Stop":
 					logging.info("Received stop")
 					run = False
@@ -189,9 +190,9 @@ def motion(num, q):
 
 	while run == False:
 		time.sleep(30)
+		logging.info("Checking messages")
 		if q.empty():
 			logging.info("No messages on stop run")
-			time.sleep(30)
 		else:
 			if q.get() == "Start":
 				logging.info("Start received - run")
