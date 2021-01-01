@@ -82,7 +82,11 @@ except:
 
 time.sleep(conf["camera_warmup_time"])
 # capture frames from the camera
-def motion(num, q):
+def loop(num, q):
+	while True:
+		motion(num, q)
+
+def motion():
 	avg = None
 	lastUploaded = datetime.now()
 	motionCounter = 0
@@ -199,7 +203,6 @@ def motion(num, q):
 				logging.info("Start received - run")
 				run = True
 				break
-	motion(0, q)
 
 
 
@@ -207,5 +210,5 @@ q = queue.Queue()
 consumer_thread = threading.Thread(target=Messenger.start_consumer, args=(0, q))
 consumer_thread.start()
 
-thread = threading.Thread(target=motion, args=(0, q))
+thread = threading.Thread(target=loop, args=(0, q))
 thread.start()
