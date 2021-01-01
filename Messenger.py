@@ -43,9 +43,9 @@ def start_consumer(num, q):
 
     def callback(ch, method, properties, body):
         if method.routing_key == "camera.start":
-            q.put("Stop")
-        elif method.routing_key == "camera.stop":
             q.put("Start")
+        elif method.routing_key == "camera.stop":
+            q.put("Stop")
     
     with PikaMassenger() as consumer:
         consumer.consume(callback=callback)
