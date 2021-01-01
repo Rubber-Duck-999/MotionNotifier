@@ -184,6 +184,7 @@ def motion(num, q):
 				if q.get() == "Stop":
 					logging.info("Received stop")
 					run = False
+					break
 				else:
 					logging.info("Received start when already on start")
 					run = True
@@ -197,6 +198,7 @@ def motion(num, q):
 			if q.get() == "Start":
 				logging.info("Start received - run")
 				run = True
+				break
 	motion()
 
 
