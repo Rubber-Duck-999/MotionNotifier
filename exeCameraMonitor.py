@@ -199,7 +199,7 @@ def motion(num, q):
 				logging.info("Start received - run")
 				run = True
 				break
-	motion()
+	motion(0, q)
 
 
 
