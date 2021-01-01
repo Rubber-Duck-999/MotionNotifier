@@ -10,6 +10,7 @@ from PIL import Image
 from datetime import datetime
 import imutils, json, time, cv2, logging
 import pika, sys, os, queue, threading
+import Messenger
 
 # initialize the camera and grab a reference to the raw camera capture
 
@@ -194,55 +195,10 @@ def motion(num, q):
 				run = True
 	motion()
 
-class PikaMassenger():
 
-    exchange_name = 'topics'
-
-    def __init__(self, *args, **kwargs):
-        try:
-            credentials = pika.PlainCredentials('guest', "password")
-            self.conn = pika.BlockingConnection(pika.ConnectionParameters('localhost', 5672, '/', credentials))
-        except pika.exceptions.ProbableAuthenticationError:
-            exit(1)
-        self.channel = self.conn.channel()
-        self.channel.exchange_declare(
-            exchange=self.exchange_name, 
-            exchange_type='topic',
-             durable=True)
-
-    def consume(self, keys, callback):
-        result = self.channel.queue_declare('', exclusive=False, durable=True)
-        queue_name = result.method.queue
-        for key in keys:
-            self.channel.queue_bind(
-                exchange=self.exchange_name, 
-                queue=queue_name, 
-                routing_key=key)
-            self.channel.queue_bind(exchange='topics', queue=queue_name, routing_key='camera.stop')
-
-        self.channel.basic_consume(
-            queue=queue_name, 
-            on_message_callback=callback, 
-            auto_ack=True)
-
-        self.channel.start_consuming()
-
-
-    def __enter__(self):
-        return self
-
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.conn.close()
-
-def start_consumer(num, q):
-
-    def callback(ch, method, properties, body):
-        print(" [x] %r:%r consumed" % (method.routing_key, body))
-        q.put("Stop")
 
 q = queue.Queue()
-consumer_thread = threading.Thread(target=start_consumer, args=(0, q))
+consumer_thread = threading.Thread(target=Messenger.start_consumer, args=(0, q))
 consumer_thread.start()
 
 thread = threading.Thread(target=motion, args=(0, q))

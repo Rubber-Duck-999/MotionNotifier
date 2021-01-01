@@ -30,7 +30,8 @@ channel.queue_bind(exchange='topics', queue=queue_name, routing_key=failure_comp
 print("Beginning Subscribe")
 print("Waiting for notifications")
 failure = '{ "time":"14:56:00", "type_of_failure": "Camera" }'
-channel.basic_publish(exchange='topics', routing_key='cheese', body=failure)
+channel.basic_publish(exchange='topics', routing_key='camera.start', body=failure)
+channel.basic_publish(exchange='topics', routing_key='camera.stop', body=failure)
 
 def callback(ch, method, properties, body):
     print("Received: " + method.routing_key)
