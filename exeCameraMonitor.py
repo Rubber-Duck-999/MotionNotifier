@@ -192,8 +192,11 @@ def motion(num, q):
 				else:
 					logging.info("Received start when already on start")
 					run = True
+			else:
+				channel.basic_publish(exchange='topics', routing_key='ping', body='')
 
 	while run == False:
+		channel.basic_publish(exchange='topics', routing_key='ping', body='')
 		time.sleep(30)
 		logging.info("Checking messages")
 		if q.empty():
