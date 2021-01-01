@@ -188,6 +188,7 @@ def motion(num, q):
 					run = True
 
 	while run == False:
+		time.sleep(30)
 		if q.empty():
 			logging.info("No messages on stop run")
 			time.sleep(30)
