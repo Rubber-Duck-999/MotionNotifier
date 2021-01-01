@@ -22,7 +22,7 @@ class PikaMassenger():
     def consume(self, callback):
         result = self.channel.queue_declare('', exclusive=False, durable=True)
         queue_name = result.method.queue
-        self.channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key='camera.*')
+        self.channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key='Camera.*')
 
         self.channel.basic_consume(
             queue=queue_name, 
@@ -42,9 +42,9 @@ class PikaMassenger():
 def start_consumer(num, q):
 
     def callback(ch, method, properties, body):
-        if method.routing_key == "camera.start":
+        if method.routing_key == "Camera.Start":
             q.put("Start")
-        elif method.routing_key == "camera.stop":
+        elif method.routing_key == "Camera.Stop":
             q.put("Stop")
     
     with PikaMassenger() as consumer:
