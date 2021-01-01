@@ -86,7 +86,7 @@ def loop(num, q):
 	while True:
 		motion(num, q)
 
-def motion():
+def motion(num, q):
 	avg = None
 	lastUploaded = datetime.now()
 	motionCounter = 0
