@@ -186,7 +186,7 @@ def motion(num, q):
 			if not q.empty():
 				logging.info("Queue isn't empty")
 				if q.get() == "Stop":
-					logging.info("Received stop")
+					logging.info("Received stop - Date: " + str(datetime.now()))
 					run = False
 					break
 				else:
@@ -200,7 +200,7 @@ def motion(num, q):
 			logging.info("No messages on stop run")
 		else:
 			if q.get() == "Start":
-				logging.info("Start received - run")
+				logging.info("Start received - run - " + str(datetime.now()))
 				run = True
 				break
 
