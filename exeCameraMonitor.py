@@ -153,14 +153,6 @@ def motion(num, q):
 						image = None
 						logging.warning("Motion detected")
 						today = datetime.now()
-						if conf["use_images"]:
-							image = today.strftime("%d:%m:%Y-%H:%M:%S") + ".jpg"
-							logging.warning("Creating file: " + image)
-							cv2.imwrite(image, frame)
-							colorImage  = Image.open(image)
-							transposed  = colorImage.rotate(180)
-							transposed.save(image)
-						logging.warning("Image created")
 						# Publish to Rabbitmq
 						x = {
 							"file": image,
