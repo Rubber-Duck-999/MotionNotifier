@@ -1,24 +1,21 @@
-# HouseGuard-CameraMonitor
+# MotionNotifier
 
-[![codebeat badge](https://codebeat.co/badges/94f2d058-b578-400b-90f6-790b96d0749c)](https://codebeat.co/projects/github-com-rubber-duck-999-houseguard-cameramonitor-master)
+Application that monitors the camera and detects whether geniuene motion has occured
 
-HouseGuard-CameraMonitor is a python component that monitors a camera feed for whether a person has affected the background of the room
+## Install
 
-## Installation
-
-This can be used on linux only
-
-Please install opencv and rabbitmq first
-
-```bash
-python3 exeCameraMonitor.py -c conf.json
-```
+`pip3 install -r requirements`
 
 
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+## Testing
 
-Please make sure to update tests as appropriate.
+`cd tests`
+`python3 -m pytest`
 
-## License
-[MIT](https://github.com/Rubber-Duck-999/HouseGuard-CameraMonitor/blob/master/LICENSE.txt)
+## Logging
+
+Logging to a file under user on linux
+
+`/home/{user}/sync/MotionNotifier.log`
+
+Im using this as Im using this folder to sync multiple devices
