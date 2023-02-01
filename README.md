@@ -2,6 +2,8 @@
 
 Application that monitors the camera and detects whether geniuene motion has occured
 
+![Camera](camera.jpg)
+
 ## Install
 
 `pip3 install -r requirements`
