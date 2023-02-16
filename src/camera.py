@@ -72,6 +72,7 @@ class Camera:
         average_frame = None
         for capture in self.camera.capture_continuous(self.raw_capture, format="bgr", use_video_port=True):
             # resize the frame, convert it to grayscale, and blur it
+            self.raw_capture.truncate()
             self.timestamp = datetime.datetime.now()
             frame = capture.array
             frame = imutils.resize(frame, width=500)
