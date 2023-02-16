@@ -28,9 +28,9 @@ class Camera:
         try:
             logging.info("Starting up camera")
             self.camera = PiCamera()
-            self.camera.resolution = (640, 480)
+            self.camera.resolution = (1280, 720)
             self.camera.framerate = 6
-            self.raw_capture = PiRGBArray(self.camera, size=(640, 480))
+            self.raw_capture = PiRGBArray(self.camera, size=(1280, 720))
             time.sleep(10)
             self.last_uploaded = datetime.datetime.now()
         except:
@@ -50,7 +50,7 @@ class Camera:
                     # check to see if we should take pictures
                     logging.info("Motion detected")
                     current = self.timestamp.strftime("%d:%m:%Y-%H:%M:%S")
-                    filename = "{}/{}.jpg".format('/home/pi/sync/cam_images', current)
+                    filename = "{}/{}.png".format('/home/pi/sync/cam_images', current)
                     logging.info("Creating file: {}".format(filename))
                     cv2.imwrite(filename, frame)
                     colorImage  = Image.open(filename)
