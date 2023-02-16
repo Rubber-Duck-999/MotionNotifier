@@ -40,7 +40,7 @@ class Motion():
                 raise FileNotFound('File is missing')
             with open(config_name) as file:
                 data = json.load(file)
-            self.server_address = '{}/motion'.format(data["manager_address"])
+            self.server_address = '{}/motion'.format(data["server_address"])
             logging.info(self.server_address)
         except KeyError:
             logging.error("Variables not set")

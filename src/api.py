@@ -14,7 +14,8 @@ class Api:
             data = {
                 'image': filename
             }
-            response = requests.post(self.server, json=data, timeout=5)
+            headers = { "ContentType": "multipart/form-data"}
+            response = requests.post(self.server, params=data, headers=headers, timeout=5)
             if response.status_code == 200:
                 logging.info("Requests successful")
                 logging.info('Response: {}'.format(response))
