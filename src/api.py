@@ -19,7 +19,6 @@ class Api:
             if response.status_code == 200:
                 logging.info("Requests successful")
                 logging.info('Response: {}'.format(response))
-                os.remove(filename)
             else:
                 logging.error('Requests unsuccessful')
                 logging.info('Response: {}'.format(response))
